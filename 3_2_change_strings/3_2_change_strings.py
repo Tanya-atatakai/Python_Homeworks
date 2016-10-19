@@ -1,4 +1,5 @@
 import re
+import sys
 
 """ ниже преобразования встроенными функциями """
 
@@ -35,28 +36,40 @@ def is_it_threedigits (s):
 
 
 s = input('Введите строку ')
-new_string = ' '
-print('Преобразования встроенными функциями... ')
-strings = s.split(' ')
-for string in strings:
-    replace = ''
-    if is_it_url(string):
-        replace = '[ссылка запрещена]'    
-    elif is_it_email(string):
-        replace = '[контакты запрещены]'
-    elif is_it_threedigits(string):
-        continue       
-    if len(replace) > 0:
-        new_string += replace + ' '
-    else:
-        new_string += string + ' '
+try: 
+    new_string = ''
+    
+    strings = s.split(' ')
+    for string in strings:
+        replace = ''
+        if is_it_url(string):
+            replace = '[ссылка запрещена]'
+        elif is_it_email(string):
+            replace = '[контакты запрещены]'
+        elif is_it_threedigits(string):
+            continue
+        if len(replace) > 0:
+            new_string += replace + ' '
+        else:
+            new_string += string + ' '    
 
-print(new_string[1] + new_string[2:].lower()) #тут первым символом я так поняла может быть символ в любом регистре
+    """ ниже преобразования регулярными выражениями """
+    
+    new_string_regular = re.sub(r'\w',s[0], s[0]) + re.sub(r'\w', lambda get_low: get_low.group(0).lower(), s[1:]) #тут первым символом я так поняла может быть символ в любом регистре
+    new_string_regular = re.sub(r'\b(?:(?:http[s]?|ftp):\/\/|www\.)[-a-z0-9|:.?&+=]*(?:(\.ru|\.com|\.рф|\.org|\.net))', '[Ссылка запрещена]' , new_string_regular)
+    new_string_regular = re.sub(r'[-a-z0-9|.]*@*[-a-z0-9|:.]*(?:(\.ru|\.com|\.рф|\.org|\.net))', '[Контакты запрещены]', new_string_regular)
+    new_string_regular = re.sub(r'\s\d\d\d\d+' , '' , new_string_regular)
 
-""" ниже преобразования страшными регулярками """
+    """ Вывод результатов преобразований встроенными функциями и регулярными выражениями"""
+    
+    print('Преобразования встроенными функциями... ')
+    print(new_string[1] + new_string[2:].lower()) 
+    print('Преобразование с помощью регулярный выражений... ')
+    print(new_string_regular)
+    
+except IndexError:
+    print('Строка пуста... ')
+except Exception:
+        print("Unexpected error:", sys.exc_info()[0])
 
-print('Преобразование с помощью регулярный выражений... ')
-new_string_regular = re.sub(r'\w',s[0], s[0]) + re.sub(r'\w', lambda get_low: get_low.group(0).lower(), s[1:])
-
-print(new_string_regular)       
 
